@@ -47,7 +47,7 @@ app.get('/', async (req, res) => {
 });
 
 // Serverni ishga tushirish
-const port = process.env.PORT || 3000;  // Hostingda portni avtomatik oladi
+const port = 8080;
 app.listen(port, () => {
     console.log(`Server http://localhost:${port} da ishlamoqda...`);
 });
